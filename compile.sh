@@ -2,10 +2,10 @@
 
 CLASSPATH=/usr/share/java:/usr/share/java/bcel.jar
 PROJECT=Paralen
-CLASSFILE="$PROJECT.class"
 JARFILE="$PROJECT.jar"
 
 for JAVAFILE in *.java; do
+	CLASSFILE=`echo "$JAVAFILE" | sed -e 's,\.java$,.class,'`
 	DATJAVA=`date +%s --reference="$JAVAFILE"`
 	DATCLASS=0
 	if [ -r "$CLASSFILE" ]; then
@@ -19,6 +19,7 @@ for JAVAFILE in *.java; do
 	fi
 done
 
+CLASSFILE="$PROJECT.class"
 JAVAFILE="$PROJECT.java"
 DATJAVA=`date +%s --reference="$JAVAFILE"`
 DATJAR=0
