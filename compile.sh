@@ -14,14 +14,19 @@ for JAVAFILE in *.java; do
 	fi
 
 	if [ $DATJAVA -gt $DATCLASS ]; then
+		echo "Compiling '$JAVAFILE'..."
 		rm -f "$CLASSFILE"
-		javac --classpath "$CLASSPATH" "$JAVAFILE"
+		javac -cp "$CLASSPATH" "$JAVAFILE"
 	fi
 done
 
-DATJAR=`date +%s --reference="$JARFILE"`
+DATJAR=0
+if [ -r "$JARFILE" ]; then
+	DATJAR=`date +%s --reference="$JARFILE"`
+fi
 
 if [ $DATJAVA -gt $DATJAR ]; then
+	echo "Creating '$JARFILE'..."
 	rm -f "$JARFILE"
 	jar -cvfm0 "$JARFILE" "$PROJECT.MF" "$CLASSFILE"
 fi
