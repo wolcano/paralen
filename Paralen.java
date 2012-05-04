@@ -56,76 +56,85 @@ public class Paralen implements ClassFileTransformer
 		}
 
 		ConstantPoolGen _cp = _cg.getConstantPool(); //Get the class' constantpool
-		for(Method m : _cg.getMethods()) //Repeat for all methods in the class
-		{
-			if(mtd == "" || m.getName().indexOf(mtd) >= 0)
+		System.out.println("Method getMethods(): "+_cg.getMethods().length);
+		try {
+			Method[] meths = _cg.getMethods();
+			for(Method m : meths) //Repeat for all methods in the class
 			{
-				System.out.println("Found "+m.getName()+" method!");
-				System.out.println(m.toString());
-				try {
-					System.out.println("dumping argument types");
-					//LocalVariableTable lvt = m.getLocalVariableTable();
+				if (m.getName().equals("<init>")) {
+					System.out.println("Skipping method "+m.getName());
+					continue;
+				}
+				if (mtd == "" || m.getName().indexOf(mtd) >= 0)
+				{
+					System.out.println("Found method: "+m.toString());
+					try {
+						System.out.println("dumping argument types");
 
-					MethodGen methodGen = new MethodGen(m, _cg.getClassName(), _cp); //Create a new MethodGen (the equivilent of createing a brand new method
-					InstructionList iList = methodGen.getInstructionList(); //Create a new list of instructions for our method
-					InstructionFactory _factory = new InstructionFactory(_cg, _cp);
-					System.out.println("phase 1.");
+						MethodGen methodGen = new MethodGen(m, _cg.getClassName(), _cp); //Create a new MethodGen (the equivilent of createing a brand new method
+						InstructionList iList = methodGen.getInstructionList(); //Create a new list of instructions for our method
+						InstructionFactory _factory = new InstructionFactory(_cg, _cp);
 
-					int pos = 1; // zacneme od 1. argumentu, 0 je this
-					for(int i = 0; i < m.getArgumentTypes().length; i++) {
-						Type t = m.getArgumentTypes()[i];
-						System.out.println(t);
+						Type[] ts = m.getArgumentTypes();
+						System.out.println("phase 2. argument count is "+ts.length);
+						int pos = 1; // zacneme od 1. argumentu, 0 je this
+						for(int i = 0; i < ts.length; i++) {
+							System.out.println("phase 2. i="+i);
+							Type t = ts[i];
+							// we start experiment with INTs
+							if (!t.toString().equals("int")) {
+								System.out.println("skipping argument of type "+t);
+								continue;
+							}
+
+							{
+								InstructionList il = new InstructionList();
+								// print static info about argument
+								InstructionHandle ih_0 = il.append(_factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Constants.GETSTATIC));
+								il.append(new PUSH(_cp, "Value of argument "+i+"("+t.toString()+"):"));
+								il.append(_factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[] { Type.STRING }, Constants.INVOKEVIRTUAL));
+
+								// now print runtime value
+								InstructionHandle ih_8 = il.append(_factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Constants.GETSTATIC));
+								il.append(_factory.createLoad(Type.INT, i));
+								il.append(_factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[] { Type.INT }, Constants.INVOKEVIRTUAL));
+
+								pos++;
+
+								iList.insert(il);
+							}
+						}
 
 						{
 							InstructionList il = new InstructionList();
-
-							InstructionHandle ih_0 = il.append(_factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Constants.GETSTATIC));
-							il.append(new PUSH(_cp, t.toString()));
+							InstructionHandle ih_x = il.append(_factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Constants.GETSTATIC));
+							il.append(new PUSH(_cp, "Hello World from "+_cg.getClassName()+"."+m.getName()));
 							il.append(_factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[] { Type.STRING }, Constants.INVOKEVIRTUAL));
-
-
-							InstructionHandle ih_8 = il.append(_factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Constants.GETSTATIC));
-							il.append(_factory.createLoad(Type.OBJECT, pos));
-							il.append(_factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[] { Type.OBJECT }, Constants.INVOKEVIRTUAL));
-
-							if (t.toString().toUpperCase() == Type.LONG.toString()) {
-								pos++;
-								pos++;
-							}
-							else {
-								pos++;
-							}
-
 							iList.insert(il);
 						}
+
+						iList.setPositions(); //cleanup
+						methodGen.setInstructionList(iList); //set the new instructionlist
+						methodGen.setMaxStack(); //cleanup
+						methodGen.setMaxLocals(); //cleanup
+						methodGen.removeLineNumbers(); //cleanup
+						_cg.replaceMethod(m, methodGen.getMethod()); //replace the old method with our new one
+
+						System.out.println("Method replacement ok.");
 					}
-
-					// print our header!
-					{
-						InstructionList il = new InstructionList();
-						InstructionHandle ih_x = il.append(_factory.createFieldAccess("java.lang.System", "out", new ObjectType("java.io.PrintStream"), Constants.GETSTATIC));
-						il.append(new PUSH(_cp, "Hello World from method "+_cg.getClassName()));
-						il.append(_factory.createInvoke("java.io.PrintStream", "println", Type.VOID, new Type[] { Type.STRING }, Constants.INVOKEVIRTUAL));
-						iList.insert(il);
+					catch (Exception e) {
+						System.out.println("Method replacement failed.");
+						System.err.println(Arrays.toString(e.getStackTrace()));
 					}
-
-
-					iList.setPositions(); //cleanup
-					methodGen.setInstructionList(iList); //set the new instructionlist
-					methodGen.setMaxStack(); //cleanup
-					methodGen.setMaxLocals(); //cleanup
-					methodGen.removeLineNumbers(); //cleanup
-
-					_cg.replaceMethod(m, methodGen.getMethod()); //replace the old method with our new one
-
-					System.out.println("Method replacement ok.");
 				}
-				catch (Exception e) {
-					System.out.println("Method replacement failed.");
-					System.err.println(Arrays.toString(e.getStackTrace()));
+				else {
+					System.out.println("Skipping method "+m.getName()+".");
 				}
-				break;
 			}
+		}
+		catch (Exception e) {
+			System.out.println("Method traversal failed.");
+			System.err.println(Arrays.toString(e.getStackTrace()));
 		}
 
 
