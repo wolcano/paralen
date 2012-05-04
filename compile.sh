@@ -2,7 +2,6 @@
 
 CLASSPATH=/usr/share/java:/usr/share/java/bcel.jar
 PROJECT=Paralen
-JAVAFILE="$PROJECT.java"
 CLASSFILE="$PROJECT.class"
 JARFILE="$PROJECT.jar"
 
@@ -20,6 +19,8 @@ for JAVAFILE in *.java; do
 	fi
 done
 
+JAVAFILE="$PROJECT.java"
+DATJAVA=`date +%s --reference="$JAVAFILE"`
 DATJAR=0
 if [ -r "$JARFILE" ]; then
 	DATJAR=`date +%s --reference="$JARFILE"`
