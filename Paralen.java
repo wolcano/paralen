@@ -19,14 +19,7 @@ import java.security.ProtectionDomain;
 
 public class Paralen implements ClassFileTransformer
 {
-	//private static String tgtcls = "com/threerings/projectx/client/ProjectXApp";
-	//private static String mtd = "ProjectXApp";
-	private static String tgtcls = "com/threerings/projectx/client/OptionsDialog";
-	//private static String mtd = "actionPerformed";
-	//private static String tgtcls = "com/threerings/projectx/auction/data/ListingInfo";
-	//private static String tgtcls = "com/threerings/opengl/gui/N";
-	//private static String mtd = "getClipboardText";
-	//private static String tgtcls = "sun/misc/CharacterDecoder";
+	private static String tgtcls = "HelloWorldApp";
 	//private static String mtd = "<init>";
 	private static String mtd = "";
 	
@@ -71,24 +64,6 @@ public class Paralen implements ClassFileTransformer
 				System.out.println(m.toString());
 				try {
 					System.out.println("dumping argument types");
-					/*
-transforming com/threerings/projectx/auction/data/ListingInfo
-Found <init> method!
-dumping...
-public void <init>(long arg1, com.threerings.projectx.auction.data.BidStatus arg3, com.threerings.projectx.auction.data.TimeLeft arg4, int arg5, int arg6, String arg7, byte[] arg8, int arg9, boolean arg10, com.threerings.projectx.auction.data.FeaturedInfo arg11)
-long
-com.threerings.projectx.auction.data.BidStatus
-com.threerings.projectx.auction.data.TimeLeft
-int
-int
-java.lang.String
-byte[]
-int
-boolean
-com.threerings.projectx.auction.data.FeaturedInfo
-ok...
-Method replaced.
-					 */
 					//LocalVariableTable lvt = m.getLocalVariableTable();
 
 					MethodGen methodGen = new MethodGen(m, _cg.getClassName(), _cp); //Create a new MethodGen (the equivilent of createing a brand new method
