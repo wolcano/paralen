@@ -1,4 +1,4 @@
 paralen
 =======
 
-Paralen! For headaches!
+Paralen! Agent for Java headaches!
